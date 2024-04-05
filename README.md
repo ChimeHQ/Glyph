@@ -10,7 +10,7 @@
 # Glyph
 Make life with TextKit better
 
-This library adds functionality to TextKit to make it easier to use. Its APIs are a light abstraction over TextKit. You don't even need to know whether your view using 1 or 2, and glyph will not downgrade TextKit 2 views. 
+This library is a light abstraction over TextKit. It provides some tools to make it easier and more efficient to work with. You don't even need to know whether your view using 1 or 2, and glyph will not downgrade TextKit 2 views.
 
 ## Installation
 
