@@ -8,6 +8,7 @@ import UIKit
 typealias TextView = UITextView
 #endif
 
+#if os(macOS) || os(iOS) || os(visionOS)
 extension TextView {
 	var visibleContainerRect: CGRect {
 #if os(macOS) && !targetEnvironment(macCatalyst)
@@ -41,3 +42,4 @@ extension TextView {
 		textSet(for: visibleContainerRect)
 	}
 }
+#endif
