@@ -10,7 +10,7 @@
 # Glyph
 Make life with TextKit better
 
-This library adds functionality to TextKit to make it easier to use. It works with both TextKit 1 and 2, and will not downgrade TextKit 2 views. 
+This library adds functionality to TextKit to make it easier to use. Its APIs are a light abstraction over TextKit. You don't even need to know whether your view using 1 or 2, and glyph will not downgrade TextKit 2 views. 
 
 ## Installation
 
