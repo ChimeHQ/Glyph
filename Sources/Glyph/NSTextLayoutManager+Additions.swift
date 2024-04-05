@@ -7,7 +7,7 @@ import UIKit
 #if os(macOS) || os(iOS) || os(visionOS)
 @available(macOS 12.0, iOS 15.0, *)
 extension NSTextLayoutManager {
-	public func enumerateLineFragments(for rect: CGRect, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSTextRange?, inout Bool) -> Void) {
+	public func enumerateLineFragments(for rect: CGRect, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSTextRange, inout Bool) -> Void) {
 		// if this is nil, our optmizations will have no effect
 		let viewportRange = textViewportLayoutController.viewportRange ?? documentRange
 		let viewportBounds = textViewportLayoutController.viewportBounds
@@ -41,7 +41,7 @@ extension NSTextLayoutManager {
 
 		enumerateTextLayoutFragments(from: location, options: options, using: { fragment in
 			let frame = fragment.layoutFragmentFrame
-			let elementRange = fragment.textElement?.elementRange
+			let elementRange = fragment.rangeInElement
 
 			var keepGoing: Bool
 
@@ -61,5 +61,22 @@ extension NSTextLayoutManager {
 		})
 	}
 
+	public func enumerateLineFragments(in range: NSRange, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSTextRange, inout Bool) -> Void) {
+		let start = documentRange.location
+		guard let end = textContentManager?.location(start, offsetBy: range.length) else {
+			return
+		}
+
+		enumerateTextLayoutFragments(from: documentRange.location, options: options) { fragment in
+			let frame = fragment.layoutFragmentFrame
+			let elementRange = fragment.rangeInElement
+
+			var stop = false
+
+			block(frame, elementRange, &stop)
+
+			return stop == false && elementRange.endLocation.compare(end) == .orderedAscending
+		}
+	}
 }
 #endif

@@ -22,19 +22,11 @@ extension TextView {
 
 	/// Returns an IndexSet representing the content within `rect`.
 	public func textSet(for rect: CGRect) -> IndexSet {
-		var set = IndexSet()
-
 #if os(macOS) && !targetEnvironment(macCatalyst)
-		guard let textContainer else {
-			return set
-		}
+		return textContainer?.textSet(for: rect) ?? IndexSet()
+#elseif os(iOS) || os(visionOS)
+		return textContainer.textSet(for: rect)
 #endif
-
-		textContainer.enumerateLineFragments(for: rect, strictIntersection: true) { _, range, _ in
-			set.insert(integersIn: range.lowerBound..<range.upperBound)
-		}
-
-		return set
 	}
 
 	/// Returns an IndexSet representing the visible content.

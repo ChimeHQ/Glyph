@@ -10,7 +10,7 @@
 # Glyph
 Make life with TextKit better
 
-This library is a light abstraction over TextKit. It provides some tools to make it easier and more efficient to work with. You don't even need to know whether your view using 1 or 2, and glyph will not downgrade TextKit 2 views.
+Glyph adds features and abstractions for working with TextKit. It makes it easier and more efficient to work with. You don't even need to know whether your view using 1 or 2, and glyph will not downgrade TextKit 2 views.
 
 ## Installation
 
@@ -25,13 +25,16 @@ dependencies: [
 ### `NSTextContainer` Additions
 
 ```swift
+func textSet(for rect: CGRect) -> IndexSet
 func enumerateLineFragments(for rect: CGRect, strictIntersection: Bool, block: (CGRect, NSRange, inout Bool) -> Void)
+func enumerateLineFragments(in range: NSRange, block: (CGRect, NSRange, inout Bool) -> Void)
 ```
 
 ### `NSTextLayoutManager` Additions
 
 ```swift
 func enumerateLineFragments(for rect: CGRect, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSTextRange?, inout Bool) -> Void)
+func enumerateLineFragments(in range: NSRange, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSTextRange, inout Bool) -> Void)
 ```
 
 ### `NSTextView`/`UITextView` Additions
