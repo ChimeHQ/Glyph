@@ -10,12 +10,34 @@
 # Glyph
 Make life with TextKit better
 
+This library adds functionality to TextKit to make it easier to use. It works with both TextKit 1 and 2, and will not downgrade TextKit 2 views. 
+
 ## Installation
 
 ```swift
 dependencies: [
     .package(url: "https://github.com/ChimeHQ/Glyph", branch: "main")
 ],
+```
+
+## Usage
+
+### `NSTextContainer` Additions
+
+```swift
+func enumerateLineFragments(for rect: CGRect, strictIntersection: Bool, block: (CGRect, NSRange, inout Bool) -> Void)
+```
+
+### `NSTextLayoutManager` Additions
+
+```swift
+func enumerateLineFragments(for rect: CGRect, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSTextRange?, inout Bool) -> Void)
+```
+
+### `NSTextView`/`UITextView` Additions
+
+```swift
+var visibleTextSet: IndexSet
 ```
 
 ## Contributing and Collaboration
