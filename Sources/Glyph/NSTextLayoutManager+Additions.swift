@@ -7,7 +7,9 @@ import UIKit
 #if os(macOS) || os(iOS) || os(visionOS)
 @available(macOS 12.0, iOS 15.0, *)
 extension NSTextLayoutManager {
-	public func enumerateLineFragments(for rect: CGRect, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSTextRange, inout Bool) -> Void) {
+	public func enumerateLineFragments(for rect: CGRect, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSRange, inout Bool) -> Void) {
+		guard let textContentManager else { return }
+
 		// if this is nil, our optmizations will have no effect
 		let viewportRange = textViewportLayoutController.viewportRange ?? documentRange
 		let viewportBounds = textViewportLayoutController.viewportBounds
@@ -55,27 +57,33 @@ extension NSTextLayoutManager {
 				return false
 			}
 
-			block(frame, elementRange, &keepGoing)
+			fragment.enumerateLineFragments(with: textContentManager) { _, frame, elementRange in
+				block(frame, elementRange, &keepGoing)
+			}
 
 			return keepGoing
 		})
 	}
 
-	public func enumerateLineFragments(in range: NSRange, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSTextRange, inout Bool) -> Void) {
+	public func enumerateLineFragments(in range: NSRange, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSRange, inout Bool) -> Void) {
+		guard let textContentManager else { return }
+
 		let start = documentRange.location
-		guard let end = textContentManager?.location(start, offsetBy: range.length) else {
+		guard let end = textContentManager.location(start, offsetBy: range.length) else {
 			return
 		}
 
 		enumerateTextLayoutFragments(from: documentRange.location, options: options) { fragment in
-			let frame = fragment.layoutFragmentFrame
-			let elementRange = fragment.rangeInElement
+			let fragmentRange = fragment.rangeInElement
 
 			var stop = false
 
-			block(frame, elementRange, &stop)
+			fragment.enumerateLineFragments(with: textContentManager) { _, frame, elementRange in
+				block(frame, elementRange, &stop)
+			}
 
-			return stop == false && elementRange.endLocation.compare(end) == .orderedAscending
+
+			return stop == false && fragmentRange.endLocation.compare(end) == .orderedAscending
 		}
 	}
 }
