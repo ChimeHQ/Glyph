@@ -43,7 +43,6 @@ extension NSTextLayoutManager {
 
 		enumerateTextLayoutFragments(from: location, options: options, using: { fragment in
 			let frame = fragment.layoutFragmentFrame
-			let elementRange = fragment.rangeInElement
 
 			var keepGoing: Bool
 
