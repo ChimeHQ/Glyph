@@ -5,11 +5,12 @@ import PackageDescription
 let package = Package(
 	name: "Glyph",
 	platforms: [
-		.macOS(.v10_15),
+		.macOS(.v10_13),
 		.macCatalyst(.v13),
-		.iOS(.v13),
-		.tvOS(.v13),
+		.iOS(.v12),
+		.tvOS(.v12),
 		.visionOS(.v1),
+
 	],
 	products: [
 		.library(name: "Glyph", targets: ["Glyph"]),
