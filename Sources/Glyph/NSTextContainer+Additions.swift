@@ -54,7 +54,7 @@ extension NSTextContainer {
 	}
 
 	/// Returns an IndexSet representing the content within `rect`.
-	public func textSet(for rect: CGRect) -> IndexSet {
+	public func characterIndexes(within rect: CGRect) -> IndexSet {
 		var set = IndexSet()
 
 		enumerateLineFragments(for: rect, strictIntersection: true) { _, range, _ in

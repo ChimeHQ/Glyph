@@ -21,17 +21,17 @@ extension TextView {
 	}
 
 	/// Returns an IndexSet representing the content within `rect`.
-	public func textSet(for rect: CGRect) -> IndexSet {
+	public func characterIndexes(within rect: CGRect) -> IndexSet {
 #if os(macOS) && !targetEnvironment(macCatalyst)
-		return textContainer?.textSet(for: rect) ?? IndexSet()
+		return textContainer?.characterIndexes(within: rect) ?? IndexSet()
 #elseif os(iOS) || os(visionOS)
-		return textContainer.textSet(for: rect)
+		return textContainer.characterIndexes(within: rect)
 #endif
 	}
 
 	/// Returns an IndexSet representing the visible content.
-	public var visibleTextSet: IndexSet {
-		textSet(for: visibleContainerRect)
+	public var visibleCharacterIndexes: IndexSet {
+		characterIndexes(within: visibleContainerRect)
 	}
 }
 #endif
