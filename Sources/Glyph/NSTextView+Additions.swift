@@ -35,7 +35,7 @@ extension TextView {
 	}
 
 	/// Returns the bounding rectangle for the given text range.
-	public func boundingRect(for range: NSRange) -> NSRect? {
+	public func boundingRect(for range: NSRange) -> CGRect? {
 #if os(macOS) && !targetEnvironment(macCatalyst)
 		guard let rect = textContainer?.boundingRect(for: range) else {
 			return nil

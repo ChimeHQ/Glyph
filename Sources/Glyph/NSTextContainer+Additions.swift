@@ -89,7 +89,7 @@ extension NSTextContainer {
 }
 
 extension NSTextContainer {
-	public func boundingRect(for range: NSRange) -> NSRect? {
+	public func boundingRect(for range: NSRange) -> CGRect? {
 		if #available(macOS 12.0, iOS 15.0, *), let textLayoutManager {
 			return textLayoutManager.boundingRect(for: range)
 		}
@@ -97,7 +97,7 @@ extension NSTextContainer {
 		return tk1BoundingRect(for: range)
 	}
 
-	private func tk1BoundingRect(for range: NSRange) -> NSRect? {
+	private func tk1BoundingRect(for range: NSRange) -> CGRect? {
 		guard let layoutManager else { return nil }
 
 		let glyphRange = layoutManager.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
