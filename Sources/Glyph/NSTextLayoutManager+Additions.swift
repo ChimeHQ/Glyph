@@ -67,7 +67,7 @@ extension NSTextLayoutManager {
 	private func enumerateTextLineFragments(
 		in range: NSRange,
 		options: NSTextLayoutFragment.EnumerationOptions = [],
-		block: (NSTextLineFragment, CGRect, NSRange, inout Bool) -> Void
+		block: (NSTextLayoutFragment, NSTextLineFragment, CGRect, NSRange, inout Bool) -> Void
 	) {
 		guard let textContentManager else { return }
 
@@ -85,7 +85,7 @@ extension NSTextLayoutManager {
 			var stop = false
 
 			fragment.enumerateLineFragments(with: textContentManager) { lineFragment, frame, elementRange in
-				block(lineFragment, frame, elementRange, &stop)
+				block(fragment, lineFragment, frame, elementRange, &stop)
 			}
 
 			return stop == false && fragmentRange.endLocation.compare(end) == .orderedAscending
@@ -121,8 +121,23 @@ extension NSTextLayoutManager {
 	func boundingRect(for range: NSRange) -> CGRect? {
 		var rect: CGRect? = nil
 
-		enumerateTextLineFragments(in: range, options: [.ensuresLayout]) { lineFragment, lineRect, lineRange, stop in
-			rect = rect?.union(lineRect) ?? lineRect
+		enumerateTextLineFragments(in: range, options: [.ensuresLayout]) { fragment, lineFragment, lineRect, lineRange, stop in
+			let startIndex = max(range.lowerBound, lineRange.lowerBound) - lineRange.lowerBound
+			let endIndex = min(range.upperBound, lineRange.upperBound) - lineRange.lowerBound
+
+			// these are relative to the lineRange
+			let startPos = lineFragment.locationForCharacter(at: startIndex)
+			let endPos = lineFragment.locationForCharacter(at: endIndex)
+			let originPadding = fragment.layoutFragmentFrame.origin.x
+
+			let bounds = CGRect(
+				x: startPos.x + originPadding,
+				y: lineRect.origin.y,
+				width: (endPos.x - startPos.x),
+				height: lineRect.height
+			)
+
+			rect = rect?.union(bounds) ?? bounds
 		}
 
 		return rect
