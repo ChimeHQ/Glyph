@@ -24,7 +24,7 @@ jobs:
         destination:
           - "platform=macOS"
           - "platform=macOS,variant=Mac Catalyst"
-          - "platform=iOS Simulator,name=iPhone 12"
+          - "platform=iOS Simulator,name=iPhone 15"
           - "platform=tvOS Simulator,name=Apple TV"
           - "platform=visionOS Simulator,name=Apple Vision Pro"
 
