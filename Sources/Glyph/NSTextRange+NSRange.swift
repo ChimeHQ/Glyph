@@ -8,6 +8,31 @@ import UIKit
 
 #if os(macOS) || os(iOS) || os(visionOS)
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, *)
+final class UTF16TextLocation: NSObject, NSTextLocation {
+	let value: Int
+
+	init(value: Int) {
+		self.value = value
+	}
+
+	func compare(_ location: any NSTextLocation) -> ComparisonResult {
+		guard let utf16Loc = location as? UTF16TextLocation else {
+			return .orderedSame
+		}
+
+		if value < utf16Loc.value {
+			return .orderedAscending
+		}
+
+		if value > utf16Loc.value {
+			return .orderedDescending
+		}
+
+		return .orderedSame
+	}
+}
+
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, *)
 extension NSRange {
 	init(_ textRange: NSTextRange, provider: NSTextElementProvider) {
 		let docLocation = provider.documentRange.location
@@ -26,5 +51,28 @@ extension NSRange {
 
 		self.init(start..<end)
 	}
+
+	public init?(_ textRange: NSTextRange) {
+		guard
+			let start = textRange.location as? UTF16TextLocation,
+			let end = textRange.endLocation as? UTF16TextLocation
+		else {
+			return nil
+		}
+
+		self.init(start.value..<end.value)
+	}
 }
+
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, *)
+@available(watchOS, unavailable)
+extension NSTextRange {
+	public convenience init?(_ range: NSRange) {
+		let start = UTF16TextLocation(value: range.lowerBound)
+		let end = UTF16TextLocation(value: range.upperBound)
+
+		self.init(location: start, end: end)
+	}
+}
+
 #endif

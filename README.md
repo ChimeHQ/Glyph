@@ -28,6 +28,7 @@ dependencies: [
 func characterIndexes(within rect: CGRect) -> IndexSet
 func enumerateLineFragments(for rect: CGRect, strictIntersection: Bool, block: (CGRect, NSRange, inout Bool) -> Void)
 func enumerateLineFragments(in range: NSRange, block: (CGRect, NSRange, inout Bool) -> Void)
+func boundingRect(for range: NSRange) -> NSRect?
 ```
 
 ### `NSTextLayoutManager` Additions
@@ -45,9 +46,17 @@ func enumerateLineFragments(with provider: NSTextElementProvider, block: (NSText
 
 ### `NSTextView`/`UITextView` Additions
 
-```
+```swift
 func characterIndexes(within rect: CGRect) -> IndexSet
 var visibleCharacterIndexes: IndexSet
+func boundingRect(for range: NSRange) -> NSRect?
+```
+
+### `NSRange` and `NSTextRange` Additions
+
+```swift
+NSRange.init?(_ textRange: NSTextRange)
+NSTextRange.init?(_ range: NSRange)
 ```
 
 ## Contributing and Collaboration

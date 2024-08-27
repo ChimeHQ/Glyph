@@ -64,7 +64,39 @@ extension NSTextLayoutManager {
 		})
 	}
 
-	public func enumerateLineFragments(in range: NSRange, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSRange, inout Bool) -> Void) {
+	private func enumerateTextLineFragments(
+		in range: NSRange,
+		options: NSTextLayoutFragment.EnumerationOptions = [],
+		block: (NSTextLineFragment, CGRect, NSRange, inout Bool) -> Void
+	) {
+		guard let textContentManager else { return }
+
+		let docStart = documentRange.location
+		guard
+			let start = textContentManager.location(docStart, offsetBy: range.lowerBound),
+			let end = textContentManager.location(docStart, offsetBy: range.upperBound)
+		else {
+			return
+		}
+
+		enumerateTextLayoutFragments(from: start, options: options) { fragment in
+			let fragmentRange = fragment.rangeInElement
+
+			var stop = false
+
+			fragment.enumerateLineFragments(with: textContentManager) { lineFragment, frame, elementRange in
+				block(lineFragment, frame, elementRange, &stop)
+			}
+
+			return stop == false && fragmentRange.endLocation.compare(end) == .orderedAscending
+		}
+	}
+
+	public func enumerateLineFragments(
+		in range: NSRange,
+		options: NSTextLayoutFragment.EnumerationOptions = [],
+		block: (CGRect, NSRange, inout Bool) -> Void
+	) {
 		guard let textContentManager else { return }
 
 		let start = documentRange.location
@@ -84,6 +116,16 @@ extension NSTextLayoutManager {
 
 			return stop == false && fragmentRange.endLocation.compare(end) == .orderedAscending
 		}
+	}
+
+	func boundingRect(for range: NSRange) -> NSRect? {
+		var rect: NSRect? = nil
+
+		enumerateTextLineFragments(in: range, options: [.ensuresLayout]) { lineFragment, lineRect, lineRange, stop in
+			rect = rect?.union(lineRect) ?? lineRect
+		}
+
+		return rect
 	}
 }
 #endif

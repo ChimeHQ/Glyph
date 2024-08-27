@@ -33,5 +33,22 @@ extension TextView {
 	public var visibleCharacterIndexes: IndexSet {
 		characterIndexes(within: visibleContainerRect)
 	}
+
+	/// Returns the bounding rectangle for the given text range.
+	public func boundingRect(for range: NSRange) -> NSRect? {
+#if os(macOS) && !targetEnvironment(macCatalyst)
+		guard let rect = textContainer?.boundingRect(for: range) else {
+			return nil
+		}
+#elseif os(iOS) || os(visionOS)
+		guard let rect = textContainer.boundingRect(for: range) else {
+			return nil
+		}
+#endif
+
+		let origin = textContainerOrigin
+
+		return rect.offsetBy(dx: origin.x, dy: origin.y)
+	}
 }
 #endif

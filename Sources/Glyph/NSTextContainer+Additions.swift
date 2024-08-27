@@ -6,16 +6,8 @@ import UIKit
 
 #if os(macOS) || os(iOS) || os(visionOS)
 extension NSTextContainer {
-	var nonDowngradingLayoutManager: NSLayoutManager? {
-		if #available(macOS 12.0, iOS 15.0, *), textLayoutManager != nil {
-			return nil
-		}
-
-		return layoutManager
-	}
-
 	private func tk1EnumerateLineFragments(for rect: CGRect, strictIntersection: Bool, block: (CGRect, NSRange, inout Bool) -> Void) {
-		guard let layoutManager = nonDowngradingLayoutManager else { return }
+		guard let layoutManager = layoutManager else { return }
 
 		let glyphRange = layoutManager.glyphRange(forBoundingRect: rect, in: self)
 
@@ -93,6 +85,32 @@ extension NSTextContainer {
 		}
 
 		tk1EnumerateLineFragments(in: range, block: block)
+	}
+}
+
+extension NSTextContainer {
+	public func boundingRect(for range: NSRange) -> NSRect? {
+		if #available(macOS 12.0, iOS 15.0, *), let textLayoutManager {
+			return textLayoutManager.boundingRect(for: range)
+		}
+
+		return tk1BoundingRect(for: range)
+	}
+
+	private func tk1BoundingRect(for range: NSRange) -> NSRect? {
+		guard let layoutManager else { return nil }
+
+		let glyphRange = layoutManager.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+
+		return layoutManager.boundingRect(forGlyphRange: glyphRange, in: self)
+	}
+
+	private func tk1TextRange(intersecting rect: CGRect) -> NSRange? {
+		guard let layoutManager else { return nil }
+
+		let glyphRange = layoutManager.glyphRange(forBoundingRect: rect, in: self)
+
+		return layoutManager.characterRange(forGlyphRange: glyphRange, actualGlyphRange: nil)
 	}
 }
 #endif
