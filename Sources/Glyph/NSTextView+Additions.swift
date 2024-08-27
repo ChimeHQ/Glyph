@@ -40,15 +40,13 @@ extension TextView {
 		guard let rect = textContainer?.boundingRect(for: range) else {
 			return nil
 		}
-#elseif os(iOS) || os(visionOS)
-		guard let rect = textContainer.boundingRect(for: range) else {
-			return nil
-		}
-#endif
 
 		let origin = textContainerOrigin
 
 		return rect.offsetBy(dx: origin.x, dy: origin.y)
+#elseif os(iOS) || os(visionOS)
+		return textContainer.boundingRect(for: range)
+#endif
 	}
 }
 #endif
