@@ -49,4 +49,28 @@ extension TextView {
 #endif
 	}
 }
+
+extension TextView {
+	/// Apply attributes that do not affect layout, if supported by the text system.
+	public func setRenderingAttributes(_ attributes: [NSAttributedString.Key : Any], for range: NSRange) {
+		// first determine if TK2 is enabled, so we do not downgrade
+		if #available(macOS 12.0, iOS 16.0, *), let textLayoutManager = textLayoutManager {
+			guard
+				let contentManager = textLayoutManager.textContentManager,
+				let textRange = NSTextRange(range, provider: contentManager)
+			else {
+				return
+			}
+
+			textLayoutManager.setRenderingAttributes(attributes, for: textRange)
+
+			return
+		}
+
+#if os(macOS)
+		layoutManager?.setTemporaryAttributes(attributes, forCharacterRange: range)
+#endif
+	}
+}
+
 #endif

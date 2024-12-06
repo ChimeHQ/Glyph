@@ -50,6 +50,8 @@ func enumerateLineFragments(with provider: NSTextElementProvider, block: (NSText
 func characterIndexes(within rect: CGRect) -> IndexSet
 var visibleCharacterIndexes: IndexSet
 func boundingRect(for range: NSRange) -> CGRect?
+
+func setRenderingAttributes(_ attributes: [NSAttributedString.Key : Any], for range: NSRange)
 ```
 
 ### `NSRange` and `NSTextRange` Additions
