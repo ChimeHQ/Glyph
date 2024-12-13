@@ -6,45 +6,23 @@ import UIKit
 
 #if os(macOS) || os(iOS) || os(visionOS)
 extension NSTextContainer {
-	private func tk1EnumerateLineFragments(for rect: CGRect, strictIntersection: Bool, block: (CGRect, NSRange, inout Bool) -> Void) {
-		guard let layoutManager = layoutManager else { return }
-
-		let glyphRange = layoutManager.glyphRange(forBoundingRect: rect, in: self)
-
-		withoutActuallyEscaping(block) { escapingBlock in
-			layoutManager.enumerateLineFragments(forGlyphRange: glyphRange) { (fragmentRect, _, _, fragmentRange, stop) in
-				var innerStop = false
-
-				if strictIntersection {
-					let intersectingRect = fragmentRect.intersection(rect)
-					let intersectingGlyphRange = layoutManager.glyphRange(forBoundingRectWithoutAdditionalLayout: intersectingRect, in: self)
-					let intersectingRange = layoutManager.characterRange(forGlyphRange: intersectingGlyphRange, actualGlyphRange: nil)
-
-					escapingBlock(intersectingRect, intersectingRange, &innerStop)
-				} else {
-					escapingBlock(fragmentRect, fragmentRange, &innerStop)
-				}
-
-				stop.pointee = ObjCBool(innerStop)
-			}
-		}
-	}
-
 	/// Enumerate the line fragments that intersect a rect.
 	///
 	/// - Parameter strictIntersection: If true, the result will only be rect and range strictly within the `rect` parameter. This is more expensive to compute.
 	public func enumerateLineFragments(for rect: CGRect, strictIntersection: Bool, block: (CGRect, NSRange, inout Bool) -> Void) {
 		if #available(macOS 12.0, iOS 15.0, *), let textLayoutManager {
-			textLayoutManager.enumerateLineFragments(for: rect) { fragmentRect, range, stop in
+			textLayoutManager.enumerateLineFragments(for: rect, strictIntersection: strictIntersection) { fragmentRect, range, stop in
 				block(fragmentRect, range, &stop)
 			}
 
 			return
 		}
 
-		tk1EnumerateLineFragments(for: rect, strictIntersection: strictIntersection, block: block)
+		layoutManager?.enumerateLineFragments(for: rect, in: self, strictIntersection: strictIntersection, block: block)
 	}
+}
 
+extension NSTextContainer {
 	/// Returns an IndexSet representing the content within `rect`.
 	public func characterIndexes(within rect: CGRect) -> IndexSet {
 		var set = IndexSet()
@@ -86,6 +64,45 @@ extension NSTextContainer {
 
 		tk1EnumerateLineFragments(in: range, block: block)
 	}
+
+	private func tk1EnumerateLineFragments(from index: Int, forward: Bool, block: (CGRect, NSRange, inout Bool) -> Void) {
+		// TODO
+	}
+
+	public func enumerateLineFragments(from index: Int, forward: Bool = true, block: (CGRect, NSRange, inout Bool) -> Void) {
+		if #available(macOS 12.0, iOS 15.0, *), let textLayoutManager {
+			let options: NSTextLayoutFragment.EnumerationOptions = forward ? [.ensuresLayout] : [.reverse, .ensuresLayout]
+
+			textLayoutManager.enumerateLineFragments(from: index, options: options, block: block)
+
+			return
+		}
+
+		tk1EnumerateLineFragments(from: index, forward: forward, block: block)
+	}
+
+	/// Find line fragment details immediately above or below a character index.
+	public func lineFragment(after index: Int, forward: Bool = true) -> (CGRect, NSRange)? {
+		var pairs: [(CGRect, NSRange)] = []
+
+		enumerateLineFragments(from: index, forward: forward) { rect, range, stop in
+			if pairs.count == 2 {
+				stop = true
+				return
+			}
+
+			pairs.append((rect, range))
+		}
+
+		guard
+			pairs.count == 2,
+			let lastLine = pairs.last
+		else {
+			return nil
+		}
+
+		return lastLine
+	}
 }
 
 extension NSTextContainer {
@@ -103,14 +120,6 @@ extension NSTextContainer {
 		let glyphRange = layoutManager.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
 
 		return layoutManager.boundingRect(forGlyphRange: glyphRange, in: self)
-	}
-
-	private func tk1TextRange(intersecting rect: CGRect) -> NSRange? {
-		guard let layoutManager else { return nil }
-
-		let glyphRange = layoutManager.glyphRange(forBoundingRect: rect, in: self)
-
-		return layoutManager.characterRange(forGlyphRange: glyphRange, actualGlyphRange: nil)
 	}
 }
 #endif

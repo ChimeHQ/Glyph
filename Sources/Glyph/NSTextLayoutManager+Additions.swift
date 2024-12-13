@@ -7,7 +7,7 @@ import UIKit
 #if os(macOS) || os(iOS) || os(visionOS)
 @available(macOS 12.0, iOS 15.0, *)
 extension NSTextLayoutManager {
-	public func enumerateLineFragments(for rect: CGRect, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSRange, inout Bool) -> Void) {
+	public func enumerateLineFragments(for rect: CGRect, strictIntersection: Bool = true, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSRange, inout Bool) -> Void) {
 		guard let textContentManager else { return }
 
 		// if this is nil, our optmizations will have no effect
@@ -44,20 +44,25 @@ extension NSTextLayoutManager {
 		enumerateTextLayoutFragments(from: location, options: options, using: { fragment in
 			let frame = fragment.layoutFragmentFrame
 
-			var keepGoing: Bool
+			if frame.intersects(rect) == false {
+				// if we don't intersect, perhaps we just haven't reached window yet?
+				if reversed {
+					return frame.minY < rect.minY
+				} else {
+					return frame.maxY < rect.maxY
+				}
+			}
 
-			if reversed {
-				keepGoing = frame.minY < rect.minY
+			var keepGoing: Bool = true
+
+			if strictIntersection {
+				fragment.enumerateLineFragments(with: textContentManager, intersecting: rect) { _, lineFrame, elementRange in
+					block(lineFrame, elementRange, &keepGoing)
+				}
 			} else {
-				keepGoing = frame.maxY < rect.maxY
-			}
-
-			if keepGoing == false {
-				return false
-			}
-
-			fragment.enumerateLineFragments(with: textContentManager) { _, frame, elementRange in
-				block(frame, elementRange, &keepGoing)
+				fragment.enumerateLineFragments(with: textContentManager) { _, lineFrame, elementRange in
+					block(lineFrame, elementRange, &keepGoing)
+				}
 			}
 
 			return keepGoing
@@ -99,6 +104,7 @@ extension NSTextLayoutManager {
 	) {
 		guard let textContentManager else { return }
 
+		// pretty sure this is a bug, range.location needs to be used no?
 		let start = documentRange.location
 		guard let end = textContentManager.location(start, offsetBy: range.length) else {
 			return
@@ -115,6 +121,30 @@ extension NSTextLayoutManager {
 
 
 			return stop == false && fragmentRange.endLocation.compare(end) == .orderedAscending
+		}
+	}
+
+	public func enumerateLineFragments(
+		from index: Int,
+		options: NSTextLayoutFragment.EnumerationOptions = [],
+		block: (CGRect, NSRange, inout Bool) -> Void
+	) {
+		guard let textContentManager else { return }
+
+		let docStart = documentRange.location
+		guard let start = textContentManager.location(docStart, offsetBy: index) else {
+			return
+		}
+
+		enumerateTextLayoutFragments(from: start, options: options) { fragment in
+			var stop = false
+
+			fragment.enumerateLineFragments(with: textContentManager) { _, frame, elementRange in
+				block(frame, elementRange, &stop)
+			}
+
+
+			return stop == false
 		}
 	}
 
