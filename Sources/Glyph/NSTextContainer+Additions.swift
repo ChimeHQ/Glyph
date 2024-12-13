@@ -81,27 +81,23 @@ extension NSTextContainer {
 		tk1EnumerateLineFragments(from: index, forward: forward, block: block)
 	}
 
-	/// Find line fragment details immediately above or below a character index.
-	public func lineFragment(after index: Int, forward: Bool = true) -> (CGRect, NSRange)? {
-		var pairs: [(CGRect, NSRange)] = []
+	/// Find line fragment offset from the first fragment containing index.
+	public func lineFragment(for index: Int, offset: Int) -> (CGRect, NSRange)? {
+		var fragment: (CGRect, NSRange)?
+		let forward = offset >= 0
+		var targetCount = abs(offset)
 
 		enumerateLineFragments(from: index, forward: forward) { rect, range, stop in
-			if pairs.count == 2 {
+			if targetCount == 0 {
+				fragment = (rect, range)
 				stop = true
 				return
 			}
 
-			pairs.append((rect, range))
+			targetCount -= 1
 		}
 
-		guard
-			pairs.count == 2,
-			let lastLine = pairs.last
-		else {
-			return nil
-		}
-
-		return lastLine
+		return fragment
 	}
 }
 

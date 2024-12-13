@@ -29,7 +29,7 @@ func characterIndexes(within rect: CGRect) -> IndexSet
 func enumerateLineFragments(for rect: CGRect, strictIntersection: Bool, block: (CGRect, NSRange, inout Bool) -> Void)
 func enumerateLineFragments(in range: NSRange, block: (CGRect, NSRange, inout Bool) -> Void)
 func enumerateLineFragments(from index: Int, forward: Bool = true, block: (CGRect, NSRange, inout Bool) -> Void)
-func lineFragment(after index: Int, forward: Bool = true) -> (CGRect, NSRange)?
+func lineFragment(for index: Int, offset: Int) -> (CGRect, NSRange)?
 func boundingRect(for range: NSRange) -> CGRect?
 ```
 
