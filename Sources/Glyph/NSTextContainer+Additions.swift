@@ -85,16 +85,16 @@ extension NSTextContainer {
 	public func lineFragment(for index: Int, offset: Int) -> (CGRect, NSRange)? {
 		var fragment: (CGRect, NSRange)?
 		let forward = offset >= 0
-		var targetCount = abs(offset)
+		var count = abs(offset)
 
 		enumerateLineFragments(from: index, forward: forward) { rect, range, stop in
-			if targetCount == 0 {
+			if count <= 0 {
 				fragment = (rect, range)
 				stop = true
 				return
 			}
 
-			targetCount -= 1
+			count -= 1
 		}
 
 		return fragment

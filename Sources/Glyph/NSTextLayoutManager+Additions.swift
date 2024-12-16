@@ -69,6 +69,22 @@ extension NSTextLayoutManager {
 		})
 	}
 
+	// the last index in the storage might not return a fragment, and the logic required
+	// to figure out which one should be in effect is atually quite complex
+	private func lastTextLayoutFragment() -> NSTextLayoutFragment? {
+		guard let textContentManager else { return nil }
+
+		if let fragment = textLayoutFragment(for: documentRange.endLocation) {
+			return fragment
+		}
+
+		guard let locBefore = textContentManager.location(documentRange.endLocation, offsetBy: -1) else {
+			return nil
+		}
+
+		return textLayoutFragment(for: locBefore)
+	}
+
 	private func enumerateTextLineFragments(
 		in range: NSRange,
 		options: NSTextLayoutFragment.EnumerationOptions = [],
@@ -81,6 +97,18 @@ extension NSTextLayoutManager {
 			let start = textContentManager.location(docStart, offsetBy: range.lowerBound),
 			let end = textContentManager.location(docStart, offsetBy: range.upperBound)
 		else {
+			return
+		}
+
+		if textContentManager.offset(from: start, to: documentRange.endLocation) == 0 {
+			guard let fragment = lastTextLayoutFragment() else { return }
+
+			var stop = false
+
+			fragment.enumerateLineFragments(with: textContentManager) { lineFragment, frame, elementRange in
+				block(fragment, lineFragment, frame, elementRange, &stop)
+			}
+
 			return
 		}
 
