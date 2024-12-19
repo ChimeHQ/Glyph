@@ -39,6 +39,7 @@ func boundingRect(for range: NSRange) -> CGRect?
 func enumerateLineFragments(for rect: CGRect, strictIntersection: Bool = true, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSRange, inout Bool) -> Void)
 func enumerateLineFragments(in range: NSRange, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSRange, inout Bool) -> Void)
 func enumerateLineFragments(from index: Int, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSRange, inout Bool) -> Void)
+func boundingRect(for range: NSRange) -> CGRect? 
 ```
 
 ### `NSTextLayoutFragment` Additions

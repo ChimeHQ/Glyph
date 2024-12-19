@@ -176,7 +176,7 @@ extension NSTextLayoutManager {
 		}
 	}
 
-	func boundingRect(for range: NSRange) -> CGRect? {
+	public func boundingRect(for range: NSRange) -> CGRect? {
 		var rect: CGRect? = nil
 
 		enumerateTextLineFragments(in: range, options: [.ensuresLayout]) { fragment, lineFragment, lineRect, lineRange, stop in
