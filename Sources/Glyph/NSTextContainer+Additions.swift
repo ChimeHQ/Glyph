@@ -11,9 +11,7 @@ extension NSTextContainer {
 	/// - Parameter strictIntersection: If true, the result will only be rect and range strictly within the `rect` parameter. This is more expensive to compute.
 	public func enumerateLineFragments(for rect: CGRect, strictIntersection: Bool, block: (CGRect, NSRange, inout Bool) -> Void) {
 		if #available(macOS 12.0, iOS 15.0, *), let textLayoutManager {
-			textLayoutManager.enumerateLineFragments(for: rect, strictIntersection: strictIntersection) { fragmentRect, range, stop in
-				block(fragmentRect, range, &stop)
-			}
+			textLayoutManager.enumerateLineFragments(for: rect, strictIntersection: strictIntersection, block: block)
 
 			return
 		}
