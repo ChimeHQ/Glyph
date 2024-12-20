@@ -35,13 +35,8 @@ extension NSTextLineFragment {
 		for index in (start..<length).reversed() {
 			let point = locationForCharacter(at: index)
 
-			if span.upperBound > point.x {
+			if span.upperBound >= point.x {
 				end = min(index + 1, length)
-				break
-			}
-
-			if span.upperBound == point.x {
-				end = index
 				break
 			}
 		}
@@ -85,16 +80,24 @@ extension NSTextLayoutFragment {
 		precondition(location >= 0)
 		precondition(location != NSNotFound)
 
-		for textLineFragment in textLineFragments {
-			let bounds = textLineFragment.typographicBounds.offsetBy(dx: origin.x, dy: origin.y)
+		var locationOffset = location
 
-			let overlap = bounds.intersection(rect)
+		for textLineFragment in textLineFragments {
+			// we have to shift to compute overlap, and then shift back to compute the span
+			let bounds = textLineFragment.typographicBounds.offsetBy(dx: origin.x, dy: origin.y)
+			let overlap = bounds.intersection(rect).offsetBy(dx: -origin.x, dy: -origin.y)
 			let span: Range<CGFloat> = overlap.minX..<overlap.maxX
+
+			// the locationOffset has to be computed even if we do not overlap
+			let offset = locationOffset
+			defer {
+				locationOffset += textLineFragment.characterRange.length
+			}
 
 			guard let localRange = textLineFragment.rangeOfCharacters(intersecting: span) else { continue }
 
 			let range = NSRange(
-				location: localRange.location + location,
+				location: localRange.location + offset,
 				length: localRange.length
 			)
 
