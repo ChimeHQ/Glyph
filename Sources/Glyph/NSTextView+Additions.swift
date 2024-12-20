@@ -62,8 +62,22 @@ extension TextView {
 				return
 			}
 
+			// apply a workaround to force rendering attributes to be applied immediately
+#if os(macOS)
+			let selection = self.selectedRanges
+#else
+			let selection = self.selectedRange
+#endif
+
 			textLayoutManager.setRenderingAttributes(attributes, for: textRange)
 
+#if os(macOS)
+			self.selectedRanges = [NSValue(range: range)]
+			self.selectedRanges = selection
+#else
+			self.selectedRange = range
+			self.selectedRange = selection
+#endif
 			return
 		}
 
