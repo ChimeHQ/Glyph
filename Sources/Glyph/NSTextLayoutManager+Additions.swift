@@ -118,6 +118,11 @@ extension NSTextLayoutManager {
 			var stop = false
 
 			fragment.enumerateLineFragments(with: textContentManager) { lineFragment, frame, elementRange in
+				// this enumeration is unconditional, but some line fragments might not be within our range
+				if elementRange.upperBound < range.lowerBound || elementRange.lowerBound > range.upperBound {
+					return
+				}
+
 				block(fragment, lineFragment, frame, elementRange, &stop)
 			}
 
