@@ -49,7 +49,7 @@ extension NSTextLineFragment {
 
 @available(macOS 12.0, iOS 15.0, *)
 extension NSTextLayoutFragment {
-	public func enumerateLineFragments(with provider: NSTextElementProvider, block: (NSTextLineFragment, CGRect, NSRange) -> Void) {
+	public func enumerateLineFragments(with provider: NSTextElementProvider, reverse: Bool = false, block: (NSTextLineFragment, CGRect, NSRange) -> Bool) {
 		let origin = layoutFragmentFrame.origin
 		let location = provider.offset?(from: provider.documentRange.location, to: rangeInElement.location) ?? 0
 
@@ -57,21 +57,41 @@ extension NSTextLayoutFragment {
 		precondition(location >= 0)
 		precondition(location != NSNotFound)
 
-		for textLineFragment in textLineFragments {
+		let fragments = reverse ? textLineFragments.reversed() : textLineFragments 
+
+		for textLineFragment in fragments {
 			let bounds = textLineFragment.typographicBounds.offsetBy(dx: origin.x, dy: origin.y)
 			let range = NSRange(
 				location: textLineFragment.characterRange.location + location,
 				length: textLineFragment.characterRange.length
 			)
 
-			block(textLineFragment, bounds, range)
+			if block(textLineFragment, bounds, range) == false {
+				return
+			}
+		}
+	}
+
+	public func enumerateLineFragments(
+		in range: NSRange,
+		with provider: NSTextElementProvider,
+		reverse: Bool = false,
+		block: (NSTextLineFragment, CGRect, NSRange) -> Bool
+	) {
+		enumerateLineFragments(with: provider, reverse: reverse) { lineFragment, frame, elementRange in
+			// this enumeration is unconditional, but some line fragments might not be within our range
+			if elementRange.upperBound < range.lowerBound || elementRange.lowerBound > range.upperBound {
+				return true
+			}
+
+			return block(lineFragment, frame, elementRange)
 		}
 	}
 
 	func enumerateLineFragments(
 		with provider: NSTextElementProvider,
 		intersecting rect: CGRect,
-		block: (NSTextLineFragment, CGRect, NSRange) -> Void
+		block: (NSTextLineFragment, CGRect, NSRange) -> Bool
 	) {
 		let origin = layoutFragmentFrame.origin
 		let location = provider.offset?(from: provider.documentRange.location, to: rangeInElement.location) ?? 0
@@ -101,7 +121,9 @@ extension NSTextLayoutFragment {
 				length: localRange.length
 			)
 
-			block(textLineFragment, bounds, range)
+			if block(textLineFragment, bounds, range) == false {
+				return
+			}
 		}
 	}
 }

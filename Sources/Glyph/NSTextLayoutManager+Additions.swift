@@ -58,10 +58,14 @@ extension NSTextLayoutManager {
 			if strictIntersection {
 				fragment.enumerateLineFragments(with: textContentManager, intersecting: rect) { _, lineFrame, elementRange in
 					block(lineFrame, elementRange, &keepGoing)
+
+					return keepGoing
 				}
 			} else {
 				fragment.enumerateLineFragments(with: textContentManager) { _, lineFrame, elementRange in
 					block(lineFrame, elementRange, &keepGoing)
+
+					return keepGoing
 				}
 			}
 
@@ -88,7 +92,7 @@ extension NSTextLayoutManager {
 	private func enumerateTextLineFragments(
 		in range: NSRange,
 		options: NSTextLayoutFragment.EnumerationOptions = [],
-		block: (NSTextLayoutFragment, NSTextLineFragment, CGRect, NSRange, inout Bool) -> Void
+		block: (NSTextLayoutFragment, NSTextLineFragment, CGRect, NSRange) -> Bool
 	) {
 		guard let textContentManager else { return }
 
@@ -100,13 +104,13 @@ extension NSTextLayoutManager {
 			return
 		}
 
+		let reverse = options.contains(.reverse)
+
 		if textContentManager.offset(from: start, to: documentRange.endLocation) == 0 {
 			guard let fragment = lastTextLayoutFragment() else { return }
 
-			var stop = false
-
-			fragment.enumerateLineFragments(with: textContentManager) { lineFragment, frame, elementRange in
-				block(fragment, lineFragment, frame, elementRange, &stop)
+			fragment.enumerateLineFragments(in: range, with: textContentManager, reverse: reverse) { lineFragment, frame, elementRange in
+				block(fragment, lineFragment, frame, elementRange)
 			}
 
 			return
@@ -115,18 +119,11 @@ extension NSTextLayoutManager {
 		enumerateTextLayoutFragments(from: start, options: options) { fragment in
 			let fragmentRange = fragment.rangeInElement
 
-			var stop = false
-
-			fragment.enumerateLineFragments(with: textContentManager) { lineFragment, frame, elementRange in
-				// this enumeration is unconditional, but some line fragments might not be within our range
-				if elementRange.upperBound < range.lowerBound || elementRange.lowerBound > range.upperBound {
-					return
-				}
-
-				block(fragment, lineFragment, frame, elementRange, &stop)
+			fragment.enumerateLineFragments(in: range, with: textContentManager, reverse: reverse) { lineFragment, frame, elementRange in
+				block(fragment, lineFragment, frame, elementRange)
 			}
 
-			return stop == false && fragmentRange.endLocation.compare(end) == .orderedAscending
+			return fragmentRange.endLocation.compare(end) == .orderedAscending
 		}
 	}
 
@@ -143,13 +140,17 @@ extension NSTextLayoutManager {
 			return
 		}
 
+		let reverse = options.contains(.reverse)
+
 		enumerateTextLayoutFragments(from: documentRange.location, options: options) { fragment in
 			let fragmentRange = fragment.rangeInElement
 
 			var stop = false
 
-			fragment.enumerateLineFragments(with: textContentManager) { _, frame, elementRange in
+			fragment.enumerateLineFragments(in: range, with: textContentManager, reverse: reverse) { _, frame, elementRange in
 				block(frame, elementRange, &stop)
+
+				return stop == false
 			}
 
 
@@ -169,13 +170,27 @@ extension NSTextLayoutManager {
 			return
 		}
 
+		let reverse = options.contains(.reverse)
+
 		enumerateTextLayoutFragments(from: start, options: options) { fragment in
 			var stop = false
 
-			fragment.enumerateLineFragments(with: textContentManager) { _, frame, elementRange in
-				block(frame, elementRange, &stop)
-			}
+			fragment.enumerateLineFragments(with: textContentManager, reverse: reverse) { _, frame, elementRange in
+				// unfortunately it is possible that our position is within a fragment, so we have to verify ranges here too. We mightnot yet actually be at a relevant fragment
+				if reverse {
+					if elementRange.lowerBound > index {
+						return true
+					}
+				} else {
+					if elementRange.upperBound < index {
+						return true
+					}
+				}
 
+				block(frame, elementRange, &stop)
+
+				return stop == false
+			}
 
 			return stop == false
 		}
@@ -184,7 +199,7 @@ extension NSTextLayoutManager {
 	public func boundingRect(for range: NSRange) -> CGRect? {
 		var rect: CGRect? = nil
 
-		enumerateTextLineFragments(in: range, options: [.ensuresLayout]) { fragment, lineFragment, lineRect, lineRange, stop in
+		enumerateTextLineFragments(in: range, options: [.ensuresLayout]) { fragment, lineFragment, lineRect, lineRange in
 			let startIndex = max(range.lowerBound, lineRange.lowerBound) - lineRange.lowerBound
 			let endIndex = min(range.upperBound, lineRange.upperBound) - lineRange.lowerBound
 
@@ -201,6 +216,8 @@ extension NSTextLayoutManager {
 			)
 
 			rect = rect?.union(bounds) ?? bounds
+
+			return true
 		}
 
 		return rect
