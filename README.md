@@ -45,8 +45,8 @@ func boundingRect(for range: NSRange) -> CGRect?
 ### `NSTextLayoutFragment` Additions
 
 ```swift
-func enumerateLineFragments(with provider: NSTextElementProvider, reverse: Bool = false, block: (NSTextLineFragment, CGRect, NSRange) -> Bool)
-func enumerateLineFragments(in range: NSRange, with provider: NSTextElementProvider, reverse: Bool = false, block: (NSTextLineFragment, CGRect, NSRange) -> Bool)
+func enumerateLineFragments(with provider: NSTextElementProvider, reverse: Bool = false, block: (NSTextLineFragment, CGRect, NSRange, Int) -> Bool)
+func enumerateLineFragments(in range: NSRange, with provider: NSTextElementProvider, reverse: Bool = false, block: (NSTextLineFragment, CGRect, NSRange, Int) -> Bool)
 ```
 
 ### `NSTextView`/`UITextView` Additions

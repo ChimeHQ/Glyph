@@ -49,7 +49,14 @@ extension NSTextLineFragment {
 
 @available(macOS 12.0, iOS 15.0, *)
 extension NSTextLayoutFragment {
-	public func enumerateLineFragments(with provider: NSTextElementProvider, reverse: Bool = false, block: (NSTextLineFragment, CGRect, NSRange) -> Bool) {
+	/// Enumerate the line fragments making out the layout fragment.
+	///
+	/// > Note: Reverse enumeration is more expensive.
+	///
+	/// - Parameter provider: used to translate ranges.
+	/// - Parameter reverse: perform enumeration in reverse, defaults to false.
+	/// - Parameter block: invoked per line fragment with the fragment itself, its bounding rect, its range in the text, and its layout fragment-relative index offset for use with the `locationForCharacter(at:)` API.
+	public func enumerateLineFragments(with provider: NSTextElementProvider, reverse: Bool = false, block: (NSTextLineFragment, CGRect, NSRange, Int) -> Bool) {
 		let origin = layoutFragmentFrame.origin
 		let location = provider.offset?(from: provider.documentRange.location, to: rangeInElement.location) ?? 0
 
@@ -57,7 +64,8 @@ extension NSTextLayoutFragment {
 		precondition(location >= 0)
 		precondition(location != NSNotFound)
 
-		let fragments = reverse ? textLineFragments.reversed() : textLineFragments 
+		let fragments = reverse ? textLineFragments.reversed() : textLineFragments
+		var offset = 0
 
 		for textLineFragment in fragments {
 			let bounds = textLineFragment.typographicBounds.offsetBy(dx: origin.x, dy: origin.y)
@@ -66,25 +74,44 @@ extension NSTextLayoutFragment {
 				length: textLineFragment.characterRange.length
 			)
 
-			if block(textLineFragment, bounds, range) == false {
+			if block(textLineFragment, bounds, range, offset) == false {
 				return
 			}
+
+			offset += textLineFragment.characterRange.length
 		}
 	}
 
+	/// Enumerate the line fragments making out the layout fragment.
+	///
+	/// > Note: Reverse enumeration is more expensive.
+	///
+	/// - Parameter range: restrict the enumeration to line fragments within this range.
+	/// - Parameter provider: used to translate ranges.
+	/// - Parameter reverse: perform enumeration in reverse, defaults to false.
+	/// - Parameter block: invoked per line fragment with the fragment itself, its bounding rect, its range in the text, and its layout fragment-relative index offset for use with the `locationForCharacter(at:)` API.
 	public func enumerateLineFragments(
 		in range: NSRange,
 		with provider: NSTextElementProvider,
 		reverse: Bool = false,
-		block: (NSTextLineFragment, CGRect, NSRange) -> Bool
+		block: (NSTextLineFragment, CGRect, NSRange, Int) -> Bool
 	) {
-		enumerateLineFragments(with: provider, reverse: reverse) { lineFragment, frame, elementRange in
+		enumerateLineFragments(with: provider, reverse: reverse) { lineFragment, frame, elementRange, offset in
 			// this enumeration is unconditional, but some line fragments might not be within our range
-			if elementRange.upperBound < range.lowerBound || elementRange.lowerBound > range.upperBound {
-				return true
+
+			if reverse {
+
+			} else {
+				if elementRange.upperBound <= range.lowerBound {
+					return true
+				}
+
+				if elementRange.lowerBound > range.upperBound {
+					return true
+				}
 			}
 
-			return block(lineFragment, frame, elementRange)
+			return block(lineFragment, frame, elementRange, offset)
 		}
 	}
 

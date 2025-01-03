@@ -62,7 +62,7 @@ extension NSTextLayoutManager {
 					return keepGoing
 				}
 			} else {
-				fragment.enumerateLineFragments(with: textContentManager) { _, lineFrame, elementRange in
+				fragment.enumerateLineFragments(with: textContentManager) { _, lineFrame, elementRange, _ in
 					block(lineFrame, elementRange, &keepGoing)
 
 					return keepGoing
@@ -92,7 +92,7 @@ extension NSTextLayoutManager {
 	private func enumerateTextLineFragments(
 		in range: NSRange,
 		options: NSTextLayoutFragment.EnumerationOptions = [],
-		block: (NSTextLayoutFragment, NSTextLineFragment, CGRect, NSRange) -> Bool
+		block: (NSTextLayoutFragment, NSTextLineFragment, CGRect, NSRange, Int) -> Bool
 	) {
 		guard let textContentManager else { return }
 
@@ -109,8 +109,12 @@ extension NSTextLayoutManager {
 		if textContentManager.offset(from: start, to: documentRange.endLocation) == 0 {
 			guard let fragment = lastTextLayoutFragment() else { return }
 
-			fragment.enumerateLineFragments(in: range, with: textContentManager, reverse: reverse) { lineFragment, frame, elementRange in
-				block(fragment, lineFragment, frame, elementRange)
+			fragment.enumerateLineFragments(
+				in: range,
+				with: textContentManager,
+				reverse: reverse
+			) { lineFragment, frame, elementRange, offset in
+				block(fragment, lineFragment, frame, elementRange, offset)
 			}
 
 			return
@@ -119,8 +123,12 @@ extension NSTextLayoutManager {
 		enumerateTextLayoutFragments(from: start, options: options) { fragment in
 			let fragmentRange = fragment.rangeInElement
 
-			fragment.enumerateLineFragments(in: range, with: textContentManager, reverse: reverse) { lineFragment, frame, elementRange in
-				block(fragment, lineFragment, frame, elementRange)
+			fragment.enumerateLineFragments(
+				in: range,
+				with: textContentManager,
+				reverse: reverse
+			) { lineFragment, frame, elementRange, offset in
+				block(fragment, lineFragment, frame, elementRange, offset)
 			}
 
 			return fragmentRange.endLocation.compare(end) == .orderedAscending
@@ -147,7 +155,11 @@ extension NSTextLayoutManager {
 
 			var stop = false
 
-			fragment.enumerateLineFragments(in: range, with: textContentManager, reverse: reverse) { _, frame, elementRange in
+			fragment.enumerateLineFragments(
+				in: range,
+				with: textContentManager,
+				reverse: reverse
+			) { _, frame, elementRange, offset in
 				block(frame, elementRange, &stop)
 
 				return stop == false
@@ -175,7 +187,7 @@ extension NSTextLayoutManager {
 		enumerateTextLayoutFragments(from: start, options: options) { fragment in
 			var stop = false
 
-			fragment.enumerateLineFragments(with: textContentManager, reverse: reverse) { _, frame, elementRange in
+			fragment.enumerateLineFragments(with: textContentManager, reverse: reverse) { _, frame, elementRange, _ in
 				// unfortunately it is possible that our position is within a fragment, so we have to verify ranges here too. We mightnot yet actually be at a relevant fragment
 				if reverse {
 					if elementRange.lowerBound > index {
@@ -199,13 +211,14 @@ extension NSTextLayoutManager {
 	public func boundingRect(for range: NSRange) -> CGRect? {
 		var rect: CGRect? = nil
 
-		enumerateTextLineFragments(in: range, options: [.ensuresLayout]) { fragment, lineFragment, lineRect, lineRange in
+		enumerateTextLineFragments(in: range, options: [.ensuresLayout]) { fragment, lineFragment, lineRect, lineRange, offset in
+			// we need to limit the check to what overlaps `range`
 			let startIndex = max(range.lowerBound, lineRange.lowerBound) - lineRange.lowerBound
 			let endIndex = min(range.upperBound, lineRange.upperBound) - lineRange.lowerBound
 
-			// these are relative to the lineRange
-			let startPos = lineFragment.locationForCharacter(at: startIndex)
-			let endPos = lineFragment.locationForCharacter(at: endIndex)
+			// these are relative to the lineRange's location within fragment
+			let startPos = lineFragment.locationForCharacter(at: startIndex + offset)
+			let endPos = lineFragment.locationForCharacter(at: endIndex + offset)
 			let originPadding = fragment.layoutFragmentFrame.origin.x
 
 			let bounds = CGRect(

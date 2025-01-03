@@ -100,6 +100,9 @@ extension NSTextContainer {
 }
 
 extension NSTextContainer {
+	/// Compute a single rect that encloses all of the text within `range`.
+	///
+	/// This area can be much larger than considering each individual line fragment independently.
 	public func boundingRect(for range: NSRange) -> CGRect? {
 		if #available(macOS 12.0, iOS 15.0, *), let textLayoutManager {
 			return textLayoutManager.boundingRect(for: range)
