@@ -211,7 +211,7 @@ extension NSTextLayoutManager {
 	public func boundingRect(for range: NSRange) -> CGRect? {
 		var rect: CGRect? = nil
 
-		enumerateTextLineFragments(in: range, options: [.ensuresLayout]) { fragment, lineFragment, lineRect, lineRange, offset in
+		enumerateTextLineFragments(in: range, options: [.ensuresLayout, .ensuresExtraLineFragment]) { fragment, lineFragment, lineRect, lineRange, offset in
 			// we need to limit the check to what overlaps `range`
 			let startIndex = max(range.lowerBound, lineRange.lowerBound) - lineRange.lowerBound
 			let endIndex = min(range.upperBound, lineRange.upperBound) - lineRange.lowerBound

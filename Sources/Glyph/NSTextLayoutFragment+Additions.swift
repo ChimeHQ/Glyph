@@ -9,7 +9,9 @@ import UIKit
 extension NSTextLineFragment {
 	/// span has to be within this fragment's coordinate system
 	func rangeOfCharacters(intersecting span: Range<CGFloat>) -> NSRange? {
-		let length = characterRange.length
+		// even an empty fragment will respond to locationForCharacter(at: 0)
+		
+		let length = max(characterRange.length, 1)
 
 		var start: Int?
 
@@ -29,6 +31,11 @@ extension NSTextLineFragment {
 		}
 
 		guard let start else { return nil }
+		
+		// continuing to look here for an empty fragment doens't make sense
+		if characterRange.length == 0 {
+			return NSRange(start..<start)
+		}
 
 		var end: Int?
 
