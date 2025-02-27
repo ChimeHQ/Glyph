@@ -53,7 +53,7 @@ extension NSTextContainer {
 	/// Enumerate the line fragments that intersect `range`.
 	public func enumerateLineFragments(in range: NSRange, block: (CGRect, NSRange, inout Bool) -> Void) {
 		if #available(macOS 12.0, iOS 15.0, *), let textLayoutManager {
-			textLayoutManager.enumerateLineFragments(in: range) { fragmentRect, fragmentRange, stop in
+			textLayoutManager.enumerateLineFragments(in: range, options: [.ensuresExtraLineFragment, .ensuresLayout]) { fragmentRect, fragmentRange, stop in
 				block(fragmentRect, fragmentRange, &stop)
 			}
 

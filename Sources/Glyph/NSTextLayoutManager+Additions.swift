@@ -142,15 +142,16 @@ extension NSTextLayoutManager {
 	) {
 		guard let textContentManager else { return }
 
-		// pretty sure this is a bug, range.location needs to be used no?
-		let start = documentRange.location
-		guard let end = textContentManager.location(start, offsetBy: range.length) else {
+		guard
+			let start = textContentManager.location(documentRange.location, offsetBy: range.location),
+			let end = textContentManager.location(start, offsetBy: range.length)
+		else {
 			return
 		}
 
 		let reverse = options.contains(.reverse)
 
-		enumerateTextLayoutFragments(from: documentRange.location, options: options) { fragment in
+		enumerateTextLayoutFragments(from: start, options: options) { fragment in
 			let fragmentRange = fragment.rangeInElement
 
 			var stop = false
@@ -165,8 +166,9 @@ extension NSTextLayoutManager {
 				return stop == false
 			}
 
-
-			return stop == false && fragmentRange.endLocation.compare(end) == .orderedAscending
+			let beforeEnd = fragmentRange.endLocation.compare(end) == .orderedAscending
+			
+			return stop == false && beforeEnd
 		}
 	}
 
