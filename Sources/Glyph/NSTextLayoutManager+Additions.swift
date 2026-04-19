@@ -73,54 +73,36 @@ extension NSTextLayoutManager {
 		})
 	}
 
-	// the last index in the storage might not return a fragment, and the logic required
-	// to figure out which one should be in effect is atually quite complex
-	private func lastTextLayoutFragment() -> NSTextLayoutFragment? {
-		guard let textContentManager else { return nil }
-
-		if let fragment = textLayoutFragment(for: documentRange.endLocation) {
-			return fragment
-		}
-
-		guard let locBefore = textContentManager.location(documentRange.endLocation, offsetBy: -1) else {
-			return nil
-		}
-
-		return textLayoutFragment(for: locBefore)
-	}
-
 	private func enumerateTextLineFragments(
-		in range: NSRange,
+		in inputRange: NSRange,
 		options: NSTextLayoutFragment.EnumerationOptions = [],
 		block: (NSTextLayoutFragment, NSTextLineFragment, CGRect, NSRange, Int) -> Bool
 	) {
 		guard let textContentManager else { return }
 
 		let docStart = documentRange.location
-		guard
-			let start = textContentManager.location(docStart, offsetBy: range.lowerBound),
-			let end = textContentManager.location(docStart, offsetBy: range.upperBound)
-		else {
-			return
-		}
+		let docEnd = documentRange.endLocation
+		let maxLength = textContentManager.offset(from: documentRange.location, to: docEnd)
 
+		// We have to check to see if we are trying to examine fragments at the limits of the content.
 		let reverse = options.contains(.reverse)
+		let limit = reverse ? 0 : maxLength
+		let range: NSRange
 
-		if textContentManager.offset(from: start, to: documentRange.endLocation) == 0 {
-			guard let fragment = lastTextLayoutFragment() else { return }
+		if inputRange.length == 0 && inputRange.location == limit {
+			let offset = reverse ? 1 : -1
+			let location = min(max(inputRange.location + offset, 0), maxLength)
 
-			fragment.enumerateLineFragments(
-				in: range,
-				with: textContentManager,
-				reverse: reverse
-			) { lineFragment, frame, elementRange, offset in
-				block(fragment, lineFragment, frame, elementRange, offset)
-			}
+			range = NSRange(location: location, length: 0)
+		} else {
+			range = inputRange
+		}
 
+		guard let textRange = NSTextRange(range, provider: textContentManager) else {
 			return
 		}
 
-		enumerateTextLayoutFragments(from: start, options: options) { fragment in
+		enumerateTextLayoutFragments(from: textRange.location, options: options) { fragment in
 			let fragmentRange = fragment.rangeInElement
 
 			fragment.enumerateLineFragments(
@@ -131,7 +113,8 @@ extension NSTextLayoutManager {
 				block(fragment, lineFragment, frame, elementRange, offset)
 			}
 
-			return fragmentRange.endLocation.compare(end) == .orderedAscending
+			// TODO: I'm not sure this comparsion is correct in the reverse direction.
+			return fragmentRange.endLocation.compare(textRange.endLocation) == .orderedAscending
 		}
 	}
 
