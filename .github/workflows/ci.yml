@@ -13,23 +13,27 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Test
     timeout-minutes: 30
-    runs-on: macOS-15
+    runs-on: macOS-26
     env:
-      DEVELOPER_DIR: /Applications/Xcode_16.1.app
+      DEVELOPER_DIR: /Applications/Xcode_26.4.app
     strategy:
       matrix:
         destination:
           - "platform=macOS"
           - "platform=macOS,variant=Mac Catalyst"
-          - "platform=iOS Simulator,name=iPhone 16"
+          - "platform=iOS Simulator,name=iPhone 16e,OS=26.2"
           - "platform=tvOS Simulator,name=Apple TV"
           - "platform=visionOS Simulator,name=Apple Vision Pro"
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v6
       - name: Test platform ${{ matrix.destination }}
         run: set -o pipefail && xcodebuild -scheme Glyph -destination "${{ matrix.destination }}" test | xcbeautify
