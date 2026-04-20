@@ -10,7 +10,7 @@ extension NSTextContainer {
 	///
 	/// - Parameter strictIntersection: If true, the result will only be rect and range strictly within the `rect` parameter. This is more expensive to compute.
 	public func enumerateLineFragments(for rect: CGRect, strictIntersection: Bool, block: (CGRect, NSRange, inout Bool) -> Void) {
-		if #available(macOS 12.0, iOS 15.0, *), let textLayoutManager {
+		if #available(macOS 12.0, iOS 15.0, tvOS 15.0, *), let textLayoutManager {
 			textLayoutManager.enumerateLineFragments(for: rect, strictIntersection: strictIntersection, options: [.ensuresExtraLineFragment], block: block)
 
 			return
@@ -52,7 +52,7 @@ extension NSTextContainer {
 
 	/// Enumerate the line fragments that intersect `range`.
 	public func enumerateLineFragments(in range: NSRange, block: (CGRect, NSRange, inout Bool) -> Void) {
-		if #available(macOS 12.0, iOS 15.0, *), let textLayoutManager {
+		if #available(macOS 12.0, iOS 15.0, tvOS 15.0, *), let textLayoutManager {
 			textLayoutManager.enumerateLineFragments(in: range, options: [.ensuresExtraLineFragment, .ensuresLayout]) { fragmentRect, fragmentRange, stop in
 				block(fragmentRect, fragmentRange, &stop)
 			}
@@ -68,7 +68,7 @@ extension NSTextContainer {
 	}
 
 	public func enumerateLineFragments(from index: Int, forward: Bool = true, block: (CGRect, NSRange, inout Bool) -> Void) {
-		if #available(macOS 12.0, iOS 15.0, *), let textLayoutManager {
+		if #available(macOS 12.0, iOS 15.0, tvOS 15.0, *), let textLayoutManager {
 			let options: NSTextLayoutFragment.EnumerationOptions = forward ? [.ensuresLayout] : [.reverse, .ensuresLayout]
 
 			textLayoutManager.enumerateLineFragments(from: index, options: options, block: block)
@@ -104,7 +104,7 @@ extension NSTextContainer {
 	///
 	/// This area can be much larger than considering each individual line fragment independently.
 	public func boundingRect(for range: NSRange) -> CGRect? {
-		if #available(macOS 12.0, iOS 15.0, *), let textLayoutManager {
+		if #available(macOS 12.0, iOS 15.0, tvOS 15.0, *), let textLayoutManager {
 			return textLayoutManager.boundingRect(for: range)
 		}
 
