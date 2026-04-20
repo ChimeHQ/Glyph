@@ -1,4 +1,4 @@
-#if os(macOS)
+#if canImport(AppKit)
 import AppKit
 
 typealias TextView = NSTextView
@@ -9,10 +9,8 @@ extension NSTextView {
 		set { self.string = newValue }
 	}
 }
-
 #elseif canImport(UIKit)
 import UIKit
 
 typealias TextView = UITextView
-
 #endif
