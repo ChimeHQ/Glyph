@@ -5,7 +5,7 @@ import UIKit
 #endif
 
 #if os(macOS) || os(iOS) || os(tvOS) || os(visionOS)
-@available(macOS 12.0, iOS 15.0, *)
+@available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
 extension NSTextLineFragment {
 	/// span has to be within this fragment's coordinate system
 	func rangeOfCharacters(intersecting span: Range<CGFloat>) -> NSRange? {
@@ -54,7 +54,7 @@ extension NSTextLineFragment {
 	}
 }
 
-@available(macOS 12.0, iOS 15.0, *)
+@available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
 extension NSTextLayoutFragment {
 	/// Enumerate the line fragments making out the layout fragment.
 	///
