@@ -1,20 +1,20 @@
-#if os(macOS) && !targetEnvironment(macCatalyst)
+#if canImport(AppKit)
 import AppKit
 
 typealias TextView = NSTextView
-#elseif os(iOS) || os(visionOS)
+#elseif canImport(UIKit)
 import UIKit
 
 typealias TextView = UITextView
 #endif
 
-#if os(macOS) || os(iOS) || os(visionOS)
+#if canImport(AppKit) || canImport(UIKit)
 extension TextView {
 	var visibleContainerRect: CGRect {
-#if os(macOS) && !targetEnvironment(macCatalyst)
+#if canImport(AppKit)
 		let origin = textContainerOrigin
 		return visibleRect.offsetBy(dx: -origin.x, dy: -origin.y)
-#elseif os(iOS) || os(visionOS)
+#else
 		return CGRect(origin: contentOffset, size: bounds.size)
 #endif
 
@@ -22,9 +22,9 @@ extension TextView {
 
 	/// Returns an IndexSet representing the content within `rect`.
 	public func characterIndexes(within rect: CGRect) -> IndexSet {
-#if os(macOS) && !targetEnvironment(macCatalyst)
+#if canImport(AppKit)
 		return textContainer?.characterIndexes(within: rect) ?? IndexSet()
-#elseif os(iOS) || os(visionOS)
+#else
 		return textContainer.characterIndexes(within: rect)
 #endif
 	}
@@ -36,7 +36,7 @@ extension TextView {
 
 	/// Returns the bounding rectangle for the given text range.
 	public func boundingRect(for range: NSRange) -> CGRect? {
-#if os(macOS) && !targetEnvironment(macCatalyst)
+#if canImport(AppKit)
 		guard let rect = textContainer?.boundingRect(for: range) else {
 			return nil
 		}
@@ -44,7 +44,7 @@ extension TextView {
 		let origin = textContainerOrigin
 
 		return rect.offsetBy(dx: origin.x, dy: origin.y)
-#elseif os(iOS) || os(visionOS)
+#else
 		return textContainer.boundingRect(for: range)
 #endif
 	}
@@ -63,7 +63,7 @@ extension TextView {
 			}
 
 			// apply a workaround to force rendering attributes to be applied immediately
-#if os(macOS)
+#if canImport(AppKit)
 			let selection = self.selectedRanges
 #else
 			let selection = self.selectedRange
@@ -71,7 +71,7 @@ extension TextView {
 
 			textLayoutManager.setRenderingAttributes(attributes, for: textRange)
 
-#if os(macOS)
+#if canImport(AppKit)
 			self.selectedRanges = [NSValue(range: range)]
 			self.selectedRanges = selection
 #else
@@ -81,7 +81,7 @@ extension TextView {
 			return
 		}
 
-#if os(macOS)
+#if canImport(AppKit)
 		layoutManager?.setTemporaryAttributes(attributes, forCharacterRange: range)
 #endif
 	}

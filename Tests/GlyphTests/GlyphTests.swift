@@ -5,7 +5,7 @@ import Glyph
 
 @MainActor
 struct TextLayoutManagerTests {
-	@available(iOS 16.0, tvOS 15.0, *)
+	@available(iOS 16.0, tvOS 16.0, *)
 	@Test
 	func forwardLineFragmentEnumeration() throws {
 		let view = TextView(usingTextLayoutManager: true)
@@ -32,7 +32,7 @@ struct TextLayoutManagerTests {
 		#expect(ranges == expected)
 	}
 
-	@available(iOS 16.0, tvOS 15.0, *)
+	@available(iOS 16.0, tvOS 16.0, *)
 	@Test
 	func reverseLineFragmentEnumeration() throws {
 		let view = TextView(usingTextLayoutManager: true)
@@ -59,7 +59,7 @@ struct TextLayoutManagerTests {
 		#expect(ranges == expected)
 	}
 
-	@available(iOS 16.0, tvOS 15.0, *)
+	@available(iOS 16.0, tvOS 16.0, *)
 	@Test
 	func forwardLineFragmentEnumerationWithExtraLine() throws {
 		let view = TextView(usingTextLayoutManager: true)
@@ -86,7 +86,7 @@ struct TextLayoutManagerTests {
 		#expect(ranges == expected)
 	}
 
-	@available(iOS 16.0, tvOS 15.0, *)
+	@available(iOS 16.0, tvOS 16.0, *)
 	@Test
 	func reverseLineFragmentEnumerationWithExtraLine() throws {
 		let view = TextView(usingTextLayoutManager: true)
@@ -113,7 +113,7 @@ struct TextLayoutManagerTests {
 		#expect(ranges == expected)
 	}
 
-	@available(iOS 16.0, tvOS 15.0, *)
+	@available(iOS 16.0, tvOS 16.0, *)
 	@Test
 	func forwardLineFragmentEnumerationWithEmptyContent() throws {
 		let view = TextView(usingTextLayoutManager: true)
@@ -137,7 +137,7 @@ struct TextLayoutManagerTests {
 		#expect(ranges == expected)
 	}
 
-	@available(iOS 16.0, tvOS 15.0, *)
+	@available(iOS 16.0, tvOS 16.0, *)
 	@Test
 	func reverseLineFragmentEnumerationWithEmptyContent() throws {
 		let view = TextView(usingTextLayoutManager: true)
@@ -161,7 +161,7 @@ struct TextLayoutManagerTests {
 		#expect(ranges == expected)
 	}
 
-	@available(iOS 16.0, tvOS 15.0, *)
+	@available(iOS 16.0, tvOS 16.0, *)
 	@Test
 	func forwardLineFragmentEnumerationAtEndOfContentWithExtraLine() throws {
 		let view = TextView(usingTextLayoutManager: true)
@@ -185,7 +185,7 @@ struct TextLayoutManagerTests {
 		#expect(ranges == expected)
 	}
 
-	@available(iOS 16.0, tvOS 15.0, *)
+	@available(iOS 16.0, tvOS 16.0, *)
 	@Test
 	func reverseLineFragmentEnumerationAtStartOfContentWithExtraLine() throws {
 		let view = TextView(usingTextLayoutManager: true)
@@ -209,7 +209,7 @@ struct TextLayoutManagerTests {
 		#expect(ranges == expected)
 	}
 
-	@available(iOS 16.0, tvOS 15.0, *)
+	@available(iOS 16.0, tvOS 16.0, *)
 	@Test
 	func forwardLineFragmentEnumerationAtEndOfContent() throws {
 		let view = TextView(usingTextLayoutManager: true)
@@ -233,7 +233,7 @@ struct TextLayoutManagerTests {
 		#expect(ranges == expected)
 	}
 
-	@available(iOS 16.0, tvOS 15.0, *)
+	@available(iOS 16.0, tvOS 16.0, *)
 	@Test
 	func reverseLineFragmentEnumerationAtStartOfContent() throws {
 		let view = TextView(usingTextLayoutManager: true)
@@ -257,7 +257,7 @@ struct TextLayoutManagerTests {
 		#expect(ranges == expected)
 	}
 
-	@available(iOS 16.0, tvOS 15.0, *)
+	@available(iOS 16.0, tvOS 16.0, *)
 	@Test
 	func forwardLineFragmentEnumerationFromIndex() throws {
 		let view = TextView(usingTextLayoutManager: true)
@@ -284,7 +284,7 @@ struct TextLayoutManagerTests {
 		#expect(ranges == expected)
 	}
 
-	@available(iOS 16.0, tvOS 15.0, *)
+	@available(iOS 16.0, tvOS 16.0, *)
 	@Test
 	func reverseLineFragmentEnumerationFromIndex() throws {
 		let view = TextView(usingTextLayoutManager: true)
