@@ -1,10 +1,10 @@
-#if canImport(AppKit)
+#if os(macOS) && !targetEnvironment(macCatalyst)
 import AppKit
-#elseif canImport(UIKit)
+#elseif os(iOS) || os(visionOS)
 import UIKit
 #endif
 
-#if canImport(AppKit) || canImport(UIKit)
+#if os(macOS) || os(iOS) || os(tvOS) || os(visionOS)
 @available(macOS 12.0, iOS 15.0, tvOS 15.0, *)
 extension NSTextLayoutManager {
 	public func enumerateLineFragments(for rect: CGRect, strictIntersection: Bool = true, options: NSTextLayoutFragment.EnumerationOptions = [], block: (CGRect, NSRange, inout Bool) -> Void) {

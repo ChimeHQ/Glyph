@@ -1,10 +1,10 @@
 #if os(macOS) && !targetEnvironment(macCatalyst)
 import AppKit
-#elseif os(iOS) || os(visionOS)
+#elseif os(iOS) || os(tvOS) || os(visionOS)
 import UIKit
 #endif
 
-#if os(macOS) || os(iOS) || os(visionOS)
+#if os(macOS) || os(iOS) || os(tvOS) || os(visionOS)
 @available(macOS 12.0, iOS 15.0, *)
 extension NSTextLineFragment {
 	/// span has to be within this fragment's coordinate system

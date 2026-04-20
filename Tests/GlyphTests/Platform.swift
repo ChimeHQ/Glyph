@@ -1,4 +1,4 @@
-#if canImport(AppKit)
+#if os(macOS) && !targetEnvironment(macCatalyst)
 import AppKit
 
 typealias TextView = NSTextView
@@ -9,7 +9,7 @@ extension NSTextView {
 		set { self.string = newValue }
 	}
 }
-#elseif canImport(UIKit)
+#elseif os(iOS) || os(tvOS) || os(visionOS)
 import UIKit
 
 typealias TextView = UITextView

@@ -1,10 +1,10 @@
 #if os(macOS) && !targetEnvironment(macCatalyst)
 import AppKit
-#elseif os(iOS) || os(visionOS)
+#elseif os(iOS) || os(tvOS) || os(visionOS)
 import UIKit
 #endif
 
-#if os(macOS) || os(iOS) || os(visionOS)
+#if os(macOS) || os(iOS) || os(tvOS) || os(visionOS)
 extension NSTextContainer {
 	/// Enumerate the line fragments that intersect a rect.
 	///

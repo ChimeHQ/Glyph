@@ -1,10 +1,10 @@
 #if os(macOS) && !targetEnvironment(macCatalyst)
 import AppKit
-#elseif os(iOS) || os(visionOS)
+#elseif os(iOS) || os(tvOS) || os(visionOS)
 import UIKit
 #endif
 
-#if os(macOS) || os(iOS) || os(visionOS)
+#if os(macOS) || os(iOS) || os(tvOS) || os(visionOS)
 extension NSLayoutManager {
 	func enumerateLineFragments(for rect: CGRect, in container: NSTextContainer, strictIntersection: Bool, block: (CGRect, NSRange, inout Bool) -> Void) {
 		let glRange = glyphRange(forBoundingRect: rect, in: container)

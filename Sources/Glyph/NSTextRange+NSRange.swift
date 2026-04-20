@@ -6,7 +6,7 @@ import UIKit
 
 // Taken from https://github.com/chimeHQ/Rearrange
 
-#if os(macOS) || os(iOS) || os(visionOS)
+#if os(macOS) || os(iOS) || os(tvOS) || os(visionOS)
 @available(iOS 15.0, macOS 12.0, tvOS 15.0, *)
 final class UTF16TextLocation: NSObject, NSTextLocation {
 	let value: Int
