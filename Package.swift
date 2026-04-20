@@ -10,7 +10,6 @@ let package = Package(
 		.iOS(.v12),
 		.tvOS(.v12),
 		.visionOS(.v1),
-
 	],
 	products: [
 		.library(name: "Glyph", targets: ["Glyph"]),
