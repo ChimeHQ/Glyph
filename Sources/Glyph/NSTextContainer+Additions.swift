@@ -79,13 +79,35 @@ extension NSTextContainer {
 		tk1EnumerateLineFragments(from: index, forward: forward, block: block)
 	}
 
+	var tk1DocumentLength: Int {
+		layoutManager?.textStorage?.length ?? 0
+	}
+
+	var documentLength: Int {
+		guard
+			#available(macOS 12.0, iOS 15.0, tvOS 15.0, *),
+			let textLayoutManager,
+			let textContentManager = textLayoutManager.textContentManager
+		else {
+			return tk1DocumentLength
+		}
+
+		return textContentManager.offset(
+			from: textContentManager.documentRange.location,
+			to: textContentManager.documentRange.endLocation
+		)
+	}
+
 	/// Find line fragment offset from the first fragment containing index.
 	public func lineFragment(for index: Int, offset: Int) -> (CGRect, NSRange)? {
 		var fragment: (CGRect, NSRange)?
 		let forward = offset >= 0
 		var count = abs(offset)
 
-		enumerateLineFragments(from: index, forward: forward) { rect, range, stop in
+		// because of how enumeration works, when going in reverse, you need to advance one position to match the expected behavior here when at line beginnings.
+		let start = forward ? index : min(index + 1, documentLength)
+
+		enumerateLineFragments(from: start, forward: forward) { rect, range, stop in
 			if count <= 0 {
 				fragment = (rect, range)
 				stop = true

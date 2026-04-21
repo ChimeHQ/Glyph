@@ -89,6 +89,8 @@ extension NSTextLayoutManager {
 		let endLocation = reverse ? textRange.location : textRange.endLocation
 		let endComparsion = reverse ? ComparisonResult.orderedDescending : ComparisonResult.orderedAscending
 
+		var keepGoing = true
+
 		enumerateTextLayoutFragments(from: location, options: options) { fragment in
 			let fragmentRange = fragment.rangeInElement
 
@@ -97,12 +99,16 @@ extension NSTextLayoutManager {
 				with: textContentManager,
 				reverse: reverse
 			) { lineFragment, frame, elementRange, offset in
-				return block(fragment, lineFragment, frame, elementRange, offset)
+				keepGoing = block(fragment, lineFragment, frame, elementRange, offset)
+
+				return keepGoing
 			}
 
-			return fragmentRange.location.compare(endLocation) == endComparsion
+			return keepGoing && fragmentRange.location.compare(endLocation) == endComparsion
 		}
 
+		guard keepGoing else { return }
+		
 		// There are a number of situations where the above code will miss a fragment.
 		//
 		// - forward, at the end of the content
@@ -202,7 +208,7 @@ extension NSTextLayoutManager {
 
 			block(frame, fragmentRange, &stop)
 
-			return stop == false
+			return !stop
 		}
 	}
 
